@@ -25,7 +25,7 @@ class _BranchViewState extends State<BranchView> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Branches'),
+        title: const Text('Branch'),
       ),
       body: Center(
         child: SizedBox(

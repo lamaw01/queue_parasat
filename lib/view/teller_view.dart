@@ -25,7 +25,7 @@ class _TellerViewState extends State<TellerView> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Tellers/CSRs'),
+        title: const Text('Teller/CSR'),
       ),
       body: Center(
         child: Column(

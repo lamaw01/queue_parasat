@@ -65,7 +65,14 @@ final _router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const BranchView(),
+      builder: (BuildContext context, GoRouterState state) {
+        String? teller = state.uri.queryParameters['teller'];
+        if (teller == 'true') {
+          return const TellerView();
+        } else {
+          return const BranchView();
+        }
+      },
     ),
     GoRoute(
       path: '/branch_counter',

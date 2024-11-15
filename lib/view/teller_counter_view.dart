@@ -36,7 +36,7 @@ class _TellerCounterViewState extends State<TellerCounterView> {
     super.dispose();
   }
 
-  Future<void> _confirmrResetDialog({required String branch}) async {
+  Future<void> _confirmResetDialog({required String branch}) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: true,
@@ -116,7 +116,7 @@ class _TellerCounterViewState extends State<TellerCounterView> {
           heroTag: 'btn-reset',
           child: const Text('Reset'),
           onPressed: () {
-            _confirmrResetDialog(branch: widget.tellerModel.branch);
+            _confirmResetDialog(branch: widget.tellerModel.branch);
           },
         ),
       ],
