@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:queue_parasat/services/dio_service.dart';
 
 import '../model/branch_model.dart';
+import '../widgets/snackbar_widget.dart';
 
 class BranchProvider with ChangeNotifier {
   bool _isLoading = true;
@@ -12,11 +13,13 @@ class BranchProvider with ChangeNotifier {
 
   Future<void> getBranch() async {
     try {
-      // await Future.delayed(const Duration(seconds: 5));
       final result = await DioService().getBranch();
       _branch = result;
     } catch (e) {
       debugPrint('getBranch provider $e');
+      final String error = "getBranch provider $e";
+      debugPrint(error);
+      showError(message: error);
     } finally {
       debugPrint("branch count ${_branch.length}");
       _isLoading = false;

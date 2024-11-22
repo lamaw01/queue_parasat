@@ -10,13 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-
 // Function to perform a SELECT query on a MySQL database using mysqli
 function performSelectQuery($mysqli, $query) {
     // Prepare the SQL statement
     if ($stmt = $mysqli->prepare($query)) {
-        // Check if parameters are passed and bind them to the query
-
         // Execute the query
         $stmt->execute();
 
@@ -36,8 +33,7 @@ function performSelectQuery($mysqli, $query) {
         return $data;
     } else {
         // If there's an error preparing the query
-        echo "Error: " . $mysqli->error;
-        return false;
+        return "Error: " . $mysqli->error;
     }
 }
 
@@ -49,16 +45,13 @@ if ($mysqli->connect_error) {
     die("Connection failed: " . $mysqli->connect_error);
 }
 
-$query = 'SELECT * FROM branch_queue';  // Using a placeholder for parameterized query
+$query = 'SELECT * FROM branch_queue ORDER BY branch ASC';  // Using a placeholder for parameterized query
 
 $result = performSelectQuery($mysqli, $query);
 
 // Print the result
-// echo "SELECT Query Result: \n";
 header('HTTP/1.1 200 OK');
 echo json_encode($result);
-
-// print_r($result);
 
 // Close the database connection
 $mysqli->close();

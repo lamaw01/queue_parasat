@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:queue_parasat/model/teller_model.dart';
+import 'package:toastification/toastification.dart';
 import 'package:url_strategy/url_strategy.dart';
 
 import 'model/branch_model.dart';
@@ -40,14 +41,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Queue Parasat',
-      debugShowCheckedModeBanner: false,
-      routerConfig: _router,
-      scrollBehavior: CustomScrollBehavior(),
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
+    return ToastificationWrapper(
+      child: MaterialApp.router(
+        title: 'Queue Parasat',
+        debugShowCheckedModeBanner: false,
+        routerConfig: _router,
+        scrollBehavior: CustomScrollBehavior(),
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          useMaterial3: true,
+        ),
       ),
     );
   }

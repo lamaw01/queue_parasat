@@ -28,39 +28,43 @@ class _BranchViewState extends State<BranchView> {
         title: const Text('Branch'),
       ),
       body: Center(
-        child: SizedBox(
-          height: 800.0,
-          width: 500.0,
-          child: Consumer<BranchProvider>(
-            builder: (context, value, child) {
-              if (value.isLoading) {
-                return const Center(
-                  child: SizedBox(
-                    height: 50.0,
-                    width: 50.0,
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              } else {
-                return ListView.builder(
-                  itemCount: value.branch.length,
-                  itemBuilder: (ctx, i) {
-                    return Card(
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
-                      ),
-                      child: ListTile(
-                        title: Text(value.branch[i].branch),
-                        onTap: () {
-                          context.push('/branch_counter', extra: value.branch[i]);
-                        },
+        child: Column(
+          children: [
+            SizedBox(
+              height: 800.0,
+              width: 500.0,
+              child: Consumer<BranchProvider>(
+                builder: (context, value, child) {
+                  if (value.isLoading) {
+                    return const Center(
+                      child: SizedBox(
+                        height: 50.0,
+                        width: 50.0,
+                        child: CircularProgressIndicator(),
                       ),
                     );
-                  },
-                );
-              }
-            },
-          ),
+                  } else {
+                    return ListView.builder(
+                      itemCount: value.branch.length,
+                      itemBuilder: (ctx, i) {
+                        return Card(
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                          child: ListTile(
+                            title: Text(value.branch[i].branch),
+                            onTap: () {
+                              context.push('/branch_counter', extra: value.branch[i]);
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
