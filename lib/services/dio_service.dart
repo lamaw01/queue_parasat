@@ -33,6 +33,15 @@ class DioService {
     return tellerModelFromJson(json.encode(response.data));
   }
 
+  Future<List<TellerModel>> getBranchTeller({required int branchId}) async {
+    final response = await _dio.post(
+      '/branch_teller.php',
+      data: {'branch_id': branchId},
+    );
+    debugPrint("getTeller ${response.data}");
+    return tellerModelFromJson(json.encode(response.data));
+  }
+
   Future<int> getCounter({required int branchId}) async {
     final response = await _dio.post(
       '/get_counter.php',

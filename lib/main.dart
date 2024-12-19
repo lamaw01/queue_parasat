@@ -8,10 +8,13 @@ import 'package:url_strategy/url_strategy.dart';
 
 import 'model/branch_model.dart';
 import 'providers/branch_provider.dart';
+import 'providers/branch_teller_provider.dart';
 import 'providers/counter_provider.dart';
 import 'providers/teller_provider.dart';
+import 'view/admin_view.dart';
 import 'view/branch_counter_view.dart';
 import 'view/branch_view.dart';
+import 'view/branch_window_view.dart';
 import 'view/teller_counter_view.dart';
 import 'view/teller_view.dart';
 
@@ -29,6 +32,9 @@ void main() {
         ),
         ChangeNotifierProvider<CounterProvider>(
           create: (_) => CounterProvider(),
+        ),
+        ChangeNotifierProvider<BranchTellerProvider>(
+          create: (_) => BranchTellerProvider(),
         ),
       ],
       child: const MyApp(),
@@ -69,12 +75,33 @@ final _router = GoRouter(
     GoRoute(
       path: '/',
       builder: (BuildContext context, GoRouterState state) {
-        String? teller = state.uri.queryParameters['teller'];
-        if (teller == 'true') {
+        String mode = state.uri.queryParameters['mode'] ?? 'branch';
+        if (mode == 'teller') {
           return const TellerView();
+        } else if (mode == 'admin') {
+          return const AdminView();
         } else {
           return const BranchView();
         }
+      },
+    ),
+    GoRoute(
+      path: '/branch',
+      builder: (context, state) => const BranchView(),
+    ),
+    GoRoute(
+      path: '/teller',
+      builder: (context, state) => const TellerView(),
+    ),
+    GoRoute(
+      path: '/admin',
+      builder: (context, state) => const AdminView(),
+    ),
+    GoRoute(
+      path: '/branch_window',
+      builder: (context, state) {
+        final BranchModel extra = GoRouterState.of(context).extra! as BranchModel;
+        return BranchWindowView(branchModel: extra);
       },
     ),
     GoRoute(
@@ -83,10 +110,6 @@ final _router = GoRouter(
         final BranchModel extra = GoRouterState.of(context).extra! as BranchModel;
         return BranchCounterView(branchModel: extra);
       },
-    ),
-    GoRoute(
-      path: '/teller',
-      builder: (context, state) => const TellerView(),
     ),
     GoRoute(
       path: '/teller_counter',

@@ -21,7 +21,6 @@ class BranchProvider with ChangeNotifier {
       debugPrint(error);
       showError(message: error);
     } finally {
-      debugPrint("branch count ${_branch.length}");
       _isLoading = false;
       notifyListeners();
     }
