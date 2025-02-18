@@ -68,4 +68,44 @@ class DioService {
     debugPrint("resetCounter ${response.data}");
     return response.data;
   }
+
+  Future<void> updateTeller({
+    required int id,
+    required int counter,
+    required String name,
+    required String type,
+    required String window,
+    required int active,
+  }) async {
+    final response = await _dio.post(
+      '/update_teller.php',
+      data: {
+        'id': id,
+        'counter': counter,
+        'name': name,
+        'type': type,
+        'window': window,
+        'active': active,
+      },
+    );
+    debugPrint("updateTeller ${response.data}");
+  }
+
+  Future<void> insertTeller({
+    required String name,
+    required String type,
+    required int branchId,
+    required String window,
+  }) async {
+    final response = await _dio.post(
+      '/insert_teller.php',
+      data: {
+        'name': name,
+        'type': type,
+        'branch_id': branchId,
+        'window': window,
+      },
+    );
+    debugPrint("insertTeller ${response.data}");
+  }
 }

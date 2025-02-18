@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:queue_parasat/model/teller_model.dart';
 
 import '../model/branch_model.dart';
 import '../providers/branch_teller_provider.dart';
+import '../widgets/snackbar_widget.dart';
 
 class BranchWindowView extends StatefulWidget {
   const BranchWindowView({super.key, required this.branchModel});
@@ -14,32 +16,40 @@ class BranchWindowView extends StatefulWidget {
 }
 
 class _BranchWindowViewState extends State<BranchWindowView> {
+  late BranchTellerProvider branchTellerProvider;
   @override
   void initState() {
     super.initState();
+    branchTellerProvider = Provider.of<BranchTellerProvider>(context, listen: false);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Provider.of<BranchTellerProvider>(context, listen: false).getBranchTeller(branchId: widget.branchModel.id);
+      await branchTellerProvider.getBranchTeller(branchId: widget.branchModel.id);
     });
   }
 
-  void _showWindowDetail(
-      {required String window, required String name, required String type, required int counter}) async {
+  void _showWindowDetail({
+    required TellerModel tellerModel,
+    required String window,
+    required String name,
+    required String type,
+    required int counter,
+    required BranchTellerProvider branchTellerProvider,
+  }) async {
     final nameController = TextEditingController(text: name);
     final counterController = TextEditingController(text: counter.toString());
+    final windowController = TextEditingController(text: window);
     const dropdownTypeList = <String>['Teller', 'CSR'];
     String dropdownTypeValue = type;
-    bool isActive = true;
+    bool isActive = tellerModel.active == 1 ? true : false;
 
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
-        debugPrint("counterController ${counterController.text}");
         return AlertDialog(
           title: Text('Window $window Details'),
           content: StatefulBuilder(builder: (context, setState) {
             return SizedBox(
-              height: 250.0,
+              height: 300.0,
               width: 300.0,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -52,8 +62,6 @@ class _BranchWindowViewState extends State<BranchWindowView> {
                       ),
                       labelText: "Name..",
                       filled: true,
-                      // hintStyle: TextStyle(color: Colors.grey[800]),
-                      // hintText: "Name..",
                       fillColor: Colors.white70,
                     ),
                   ),
@@ -65,42 +73,57 @@ class _BranchWindowViewState extends State<BranchWindowView> {
                       ),
                       labelText: "Counter..",
                       filled: true,
-                      // hintStyle: TextStyle(color: Colors.grey[800]),
-                      // hintText: "Counter..",
                       fillColor: Colors.white70,
                     ),
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white70,
-                      border: Border.all(color: Colors.black, width: 1.0),
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(8.0),
-                      ),
-                    ),
-                    width: double.maxFinite,
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        isDense: true,
+                  TextField(
+                    controller: windowController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
-                        padding: const EdgeInsets.all(8.0),
-                        value: dropdownTypeValue,
-                        onChanged: (String? value) {
-                          setState(() {
-                            dropdownTypeValue = value!;
-                          });
-                          debugPrint("dropdownTypeValue $dropdownTypeValue");
-                        },
-                        items: dropdownTypeList.map<DropdownMenuItem<String>>(
-                          (String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          },
-                        ).toList(),
                       ),
+                      labelText: "Window..",
+                      filled: true,
+                      fillColor: Colors.white70,
                     ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Type:', style: TextStyle(fontSize: 16.0)),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white70,
+                          border: Border.all(color: Colors.black, width: 1.0),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(8.0),
+                          ),
+                        ),
+                        width: 200.0,
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isDense: true,
+                            borderRadius: BorderRadius.circular(8.0),
+                            padding: const EdgeInsets.all(8.0),
+                            value: dropdownTypeValue,
+                            onChanged: (String? value) {
+                              setState(() {
+                                dropdownTypeValue = value!;
+                              });
+                              debugPrint("dropdownTypeValue $dropdownTypeValue");
+                            },
+                            items: dropdownTypeList.map<DropdownMenuItem<String>>(
+                              (String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              },
+                            ).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   StatefulBuilder(
                     builder: (context, setState) {
@@ -133,7 +156,162 @@ class _BranchWindowViewState extends State<BranchWindowView> {
           actions: <Widget>[
             TextButton(
               child: const Text('Ok'),
+              onPressed: () async {
+                if (nameController.text.isNotEmpty) {
+                  await branchTellerProvider.updateTeller(
+                    id: tellerModel.id,
+                    counter: int.tryParse(counterController.text) ?? 0,
+                    name: nameController.text,
+                    type: dropdownTypeValue,
+                    window: windowController.text.trim(),
+                    active: isActive == true ? 1 : 0,
+                  );
+                } else {
+                  showError(message: 'Missing Parameters..');
+                }
+                // ignore: use_build_context_synchronously
+                branchTellerProvider.getBranchTeller(branchId: widget.branchModel.id);
+                // ignore: use_build_context_synchronously
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel'),
               onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showInsertTellerWindow({required BranchTellerProvider branchTellerProvider}) async {
+    final nameController = TextEditingController();
+    final windowController = TextEditingController();
+    const dropdownTypeList = <String>['Teller', 'CSR'];
+    String dropdownTypeValue = dropdownTypeList.first;
+    bool isActive = true;
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('New Teller'),
+          content: StatefulBuilder(builder: (context, setState) {
+            return SizedBox(
+              height: 250.0,
+              width: 300.0,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      labelText: "Name..",
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                  ),
+                  TextField(
+                    controller: windowController,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      labelText: "Window..",
+                      filled: true,
+                      fillColor: Colors.white70,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Type:', style: TextStyle(fontSize: 16.0)),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white70,
+                          border: Border.all(color: Colors.black, width: 1.0),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(8.0),
+                          ),
+                        ),
+                        width: 200.0,
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isDense: true,
+                            borderRadius: BorderRadius.circular(8.0),
+                            padding: const EdgeInsets.all(8.0),
+                            value: dropdownTypeValue,
+                            onChanged: (String? value) {
+                              setState(() {
+                                dropdownTypeValue = value!;
+                              });
+                              debugPrint("dropdownTypeValue $dropdownTypeValue");
+                            },
+                            items: dropdownTypeList.map<DropdownMenuItem<String>>(
+                              (String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              },
+                            ).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  StatefulBuilder(
+                    builder: (context, setState) {
+                      return SizedBox(
+                        width: 280.0,
+                        child: Row(
+                          children: [
+                            const Text(
+                              'Active:',
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                            CupertinoSwitch(
+                              value: isActive,
+                              onChanged: (_) {
+                                setState(() {
+                                  isActive = !isActive;
+                                });
+                                debugPrint("isActive $isActive");
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            );
+          }),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Ok'),
+              onPressed: () async {
+                if (nameController.text.isNotEmpty && windowController.text.isNotEmpty) {
+                  await branchTellerProvider.insertTeller(
+                    name: nameController.text,
+                    type: dropdownTypeValue,
+                    branchId: widget.branchModel.id,
+                    window: windowController.text.trim(),
+                  );
+                } else {
+                  showError(message: 'Missing Parameters..');
+                }
+                // ignore: use_build_context_synchronously
+                branchTellerProvider.getBranchTeller(branchId: widget.branchModel.id);
+                // ignore: use_build_context_synchronously
                 Navigator.of(context).pop();
               },
             ),
@@ -208,10 +386,13 @@ class _BranchWindowViewState extends State<BranchWindowView> {
                               ),
                               onTap: () {
                                 _showWindowDetail(
-                                    window: value.branchTeller[i].window,
-                                    name: value.branchTeller[i].name,
-                                    type: value.branchTeller[i].type,
-                                    counter: value.branchTeller[i].counter);
+                                  tellerModel: value.branchTeller[i],
+                                  window: value.branchTeller[i].window,
+                                  name: value.branchTeller[i].name,
+                                  type: value.branchTeller[i].type,
+                                  counter: value.branchTeller[i].counter,
+                                  branchTellerProvider: branchTellerProvider,
+                                );
                               },
                             ),
                           );
@@ -224,6 +405,12 @@ class _BranchWindowViewState extends State<BranchWindowView> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showInsertTellerWindow(branchTellerProvider: branchTellerProvider);
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
