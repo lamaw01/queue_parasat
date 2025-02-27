@@ -161,7 +161,7 @@ class _BranchWindowViewState extends State<BranchWindowView> {
                   await branchTellerProvider.updateTeller(
                     id: tellerModel.id,
                     counter: int.tryParse(counterController.text) ?? 0,
-                    name: nameController.text,
+                    name: nameController.text.trim(),
                     type: dropdownTypeValue,
                     window: windowController.text.trim(),
                     active: isActive == true ? 1 : 0,
@@ -327,6 +327,40 @@ class _BranchWindowViewState extends State<BranchWindowView> {
     );
   }
 
+  void _showDeleteTellerWindow({
+    required BranchTellerProvider branchTellerProvider,
+    required TellerModel tellerModel,
+  }) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Teller'),
+          content: Text('Delete ${tellerModel.name}?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Ok'),
+              onPressed: () async {
+                await branchTellerProvider.deleteTeller(id: tellerModel.id);
+                // ignore: use_build_context_synchronously
+                branchTellerProvider.getBranchTeller(branchId: widget.branchModel.id);
+                // ignore: use_build_context_synchronously
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -378,7 +412,12 @@ class _BranchWindowViewState extends State<BranchWindowView> {
                               title: Text(value.branchTeller[i].name),
                               subtitle: Text("${value.branchTeller[i].type} "),
                               trailing: IconButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  _showDeleteTellerWindow(
+                                    branchTellerProvider: branchTellerProvider,
+                                    tellerModel: value.branchTeller[i],
+                                  );
+                                },
                                 icon: const Icon(
                                   Icons.delete,
                                   color: Colors.red,

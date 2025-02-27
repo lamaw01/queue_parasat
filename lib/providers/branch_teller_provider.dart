@@ -62,4 +62,19 @@ class BranchTellerProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> deleteTeller({
+    required int id,
+  }) async {
+    try {
+      await DioService().deleteTeller(id: id);
+    } catch (e) {
+      final String error = "deleteTeller provider $e";
+      debugPrint(error);
+      showError(message: error);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

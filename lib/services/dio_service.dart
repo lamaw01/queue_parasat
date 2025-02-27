@@ -108,4 +108,14 @@ class DioService {
     );
     debugPrint("insertTeller ${response.data}");
   }
+
+  Future<void> deleteTeller({
+    required int id,
+  }) async {
+    final response = await _dio.post(
+      '/delete_teller.php',
+      data: {'id': id},
+    );
+    debugPrint("deleteTeller ${response.data}");
+  }
 }
