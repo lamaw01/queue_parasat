@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:queue_parasat/model/teller_model.dart';
 
 import '../model/branch_model.dart';
+import '../model/log_model.dart';
 
 class DioService {
   static const String _serverUrl = 'https://konek.parasat.tv:53000/';
@@ -117,5 +118,14 @@ class DioService {
       data: {'id': id},
     );
     debugPrint("deleteTeller ${response.data}");
+  }
+
+  Future<List<LogModel>> getLog({required int branchId}) async {
+    final response = await _dio.post(
+      '/get_branch_log.php',
+      data: {'branch_id': branchId},
+    );
+    debugPrint("getLog dio ${response.data}");
+    return logModelFromJson(json.encode(response.data));
   }
 }
